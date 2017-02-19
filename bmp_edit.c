@@ -2,12 +2,9 @@
 #include <string.h>
 #include <math.h>
 #pragma pack(1)
-/* this program will transform a BMP image with the following two operations:
- * - invert (command line args: -invert FILENAME)
- * - grayscale (command line args: -grayscale FILENAME)
- *   AUTHOR: ERIC DONG ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *   DATE CREATED: 9 / 28 / 16~~~~~~~~~~~~~~~~~~~~~~~~~~
- *   LAST MODIFICATION DATE: 10 / 2 / 16 ~~~~~~~~~~~~~~
+/*
+ *   AUTHOR: ERIC DONG 
+ *   DATE CREATED: 9 / 28 / 16
  */
 
 FILE *in_file; // used for reading and writing  
@@ -103,9 +100,6 @@ struct pixel {
 
     printf("image width: %d\nimage height: %d\n", dib_head.width_img, dib_head.height_img);
 
-    
-   
-     
     // if else if statement allows the user to invert the bits or grayscale them via command line arguments
     if (strcmp(argv[1],"-invert") == 0) {
         // do invert stuff here
@@ -126,33 +120,18 @@ struct pixel {
 	// inner for loop iterates over the width
 	printf("size of pix: %d\n", sizeof(pix));  // should be 3
 	for (height = 0; height < dib_head.height_img; height++) {
-	     
-	   
 	    for (width = 0; width < dib_head.width_img; width++) {	
-		//printf("width: %d\ny: %d\n", width,height);
-		fread(&pix, 1, sizeof(pix), in_file);
-		//printf("blue: %#x\ngreen: %#x\nred: %#x\n", pix.blue_inten, pix.green_inten, pix.red_inten);
-		// inverting bits. 
-		pix.blue_inten = ~pix.blue_inten;
-		pix.green_inten = ~pix.green_inten;
-		pix.red_inten = ~pix.red_inten;
-		//printf("blue: %#x\ngreen: %#x\nred: %#x\n", pix.blue_inten, pix.green_inten, pix.red_inten);
+			fread(&pix, 1, sizeof(pix), in_file); 
+			pix.blue_inten = ~pix.blue_inten;
+			pix.green_inten = ~pix.green_inten;
+			pix.red_inten = ~pix.red_inten;
  	        fseek(in_file, - sizeof(pix), SEEK_CUR);  // bring the file point 3 bytes back, preparing to write new values
-	  		
-		fwrite(&pix, 1, sizeof(pix), in_file);
-		 
-		
+			fwrite(&pix, 1, sizeof(pix), in_file);
 	     }
 	     // skip padding bytes before processing next row.
-	     //printf("adding padding bytes . . . "); 
 	     fseek(in_file, num_pad, SEEK_CUR);
-	     
-	     
-	     	
-	     
         }
 	printf("Inversion Complete.\n");  
-    
      } else if (strcmp(argv[1],"-grayscale") == 0) {
         // do grayscale stuff here
         printf("grayscaling . . .\n");
@@ -171,26 +150,18 @@ struct pixel {
 	// inner for loop iterates over the width
 	printf("size of pix: %d\n", sizeof(pix));  // should be 3
 	for (height = 0; height < dib_head.height_img; height++) {
-	     
-	   
 	    for (width = 0; width < dib_head.width_img; width++) {	
-		//printf("x: %d\ny: %d\n", x,height);
-		fread(&pix, 1, sizeof(pix), in_file);
 		
+		fread(&pix, 1, sizeof(pix), in_file);
 		// grayscaling picture work starts here
 
 		// normalizing values color intensity values
-		//printf("1red_inten: %d\ngreen_inten: %d\nblue_inten: %d\n", pix.red_inten, pix.green_inten, pix.blue_inten);	
-		
   		red_norm = (float) pix.red_inten / (float) 255.0;
 		green_norm = (float) pix.green_inten / (float) 255.0;
 		blue_norm = (float) pix.blue_inten / (float) 255.0;  
-		//printf("red_norm: %f\ngreen_norm: %f\nblue_norm: %f\n", red_norm, green_norm, blue_norm); 
-		
-		y = (0.2126 * red_norm) + (0.7152 * green_norm) + (0.0722 * blue_norm);
-		//printf("y = %f\n", y);
+		y = (0.2126 * red_norm) + (0.7152 * green_norm) + (0.0722 * blue_norm);;
 		if (y <= 0.0031308) {
-                    red_norm = (12.92 * y)* 255.0;
+            red_norm = (12.92 * y)* 255.0;
 		    green_norm = (12.92 * y) * 255.0;
 		    blue_norm = (12.92 * y) * 255.0; 
   		} else {
@@ -198,28 +169,20 @@ struct pixel {
 		    green_norm = (1.055 * pow(y, (1.0/2.4)) - 0.055) * 255.0; 
 		    blue_norm = (1.055 * pow(y, (1.0/2.4)) - 0.055) * 255.0;
 		}
-        	//printf("red_norm: %f\ngreen_norm: %f\nblue_norm: %f\n", red_norm, green_norm, blue_norm);
+   
 		// converting values back into char
 		pix.red_inten = (unsigned char) red_norm;
 		pix.green_inten = (unsigned char) green_norm;
 		pix.blue_inten = (unsigned char) blue_norm;
-		
-		//printf("2red_inten: %d\ngreen_inten: %d\nblue_inten: %d\n", pix.red_inten, pix.green_inten, pix.blue_inten);
- 	        
+
 		fseek(in_file, - sizeof(pix), SEEK_CUR);  // bring the file point 3 bytes back, preparing to write new values
-	  		
 		fwrite(&pix, 1, sizeof(pix), in_file);
 		 
 		
-	     }
+	    }
 	     // skip padding bytes before processing next row.
-	     //printf("adding padding bytes . . . "); 
 	     fseek(in_file, num_pad, SEEK_CUR);
-	     
-	     
-	     	
-	     
-        }
+    }
     printf("Image Grayscaled.\n");
     }
 
